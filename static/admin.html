@@ -74,6 +74,11 @@
             font-size: 0.9rem;
             word-break: break-all;
         }
+        .file-info {
+            margin-top: 5px;
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
         .btn {
             background-color: #3498db;
             color: white;
@@ -148,6 +153,19 @@
             margin-top: 0.5rem;
         }
 
+        .quality-control {
+            margin: 15px 0;
+            text-align: left;
+        }
+        .quality-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        .quality-slider {
+            width: 100%;
+        }
+
         @media (min-width: 768px) {
             body {
                 padding: 20px;
@@ -178,11 +196,17 @@
             <div class="upload-icon">📁</div>
             <div class="upload-text">点击或拖拽图片到此处</div>
             <div class="file-name" id="fileName"></div>
+            <div class="file-info" id="fileInfo"></div>
             <div id="status" class="status"></div>
         </div>
         
         <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif" style="display: none;" />
         
+        <div class="quality-control">
+            <label for="quality" class="quality-label">图片质量: <span id="qualityValue">80</span>%</label>
+            <input type="range" id="quality" class="quality-slider" min="10" max="100" value="80">
+        </div>
+
         <button class="btn" id="uploadBtn" disabled>
             <i>↑</i> 上传二维码
         </button>
@@ -198,6 +222,9 @@
         const imageInput = document.getElementById('imageInput');
         const uploadBtn = document.getElementById('uploadBtn');
         const fileName = document.getElementById('fileName');
+        const fileInfo = document.getElementById('fileInfo');
+        const qualitySlider = document.getElementById('quality');
+        const qualityValue = document.getElementById('qualityValue');
 
         // 授权检查
         const urlParams = new URLSearchParams(window.location.search);
@@ -211,16 +238,47 @@
             `;
         }
 
-        // 实时预览
-        const previewImage = () => {
-            const file = document.getElementById('imageInput').files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('currentImage').src = e.target.result;
+        // 图片压缩函数
+        function compressImage(file, quality, callback) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    // 限制最大尺寸为1000px
+                    const MAX_WIDTH = 1000;
+                    const MAX_HEIGHT = 1000;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // 转换为Blob对象
+                    canvas.toBlob(callback, file.type, quality/100);
                 };
-                reader.readAsDataURL(file);
-            }
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 实时预览
+        const previewImage = (src) => {
+            document.getElementById('currentImage').src = src;
         };
 
         // 上传区域点击事件
@@ -231,8 +289,24 @@
         // 文件选择事件
         imageInput.addEventListener('change', (e) => {
             if (e.target.files.length) {
-                updateUI(e.target.files[0]);
-                previewImage();
+                const file = e.target.files[0];
+                updateUI(file);
+                
+                // 压缩图片并预览
+                compressImage(file, qualitySlider.value, (blob) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        previewImage(e.target.result);
+                        // 更新文件信息
+                        const originalSize = (file.size / 1024).toFixed(2);
+                        const compressedSize = (blob.size / 1024).toFixed(2);
+                        fileInfo.innerHTML = `
+                            原始大小: ${originalSize} KB<br>
+                            压缩后: ${compressedSize} KB (节省 ${((1 - blob.size/file.size)*100).toFixed(1)}%)
+                        `;
+                    };
+                    reader.readAsDataURL(blob);
+                });
             }
         });
 
@@ -241,6 +315,27 @@
             fileName.textContent = file.name;
             uploadBtn.disabled = false;
         }
+
+        // 质量滑块事件
+        qualitySlider.addEventListener('input', () => {
+            qualityValue.textContent = qualitySlider.value;
+            if (imageInput.files.length) {
+                const file = imageInput.files[0];
+                compressImage(file, qualitySlider.value, (blob) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        previewImage(e.target.result);
+                        const originalSize = (file.size / 1024).toFixed(2);
+                        const compressedSize = (blob.size / 1024).toFixed(2);
+                        fileInfo.innerHTML = `
+                            原始大小: ${originalSize} KB<br>
+                            压缩后: ${compressedSize} KB (节省 ${((1 - blob.size/file.size)*100).toFixed(1)}%)
+                        `;
+                    };
+                    reader.readAsDataURL(blob);
+                });
+            }
+        });
 
         // 上传处理
         uploadBtn.addEventListener('click', async () => {
@@ -255,32 +350,40 @@
             }
 
             const file = fileInput.files[0];
-            const reader = new FileReader();
+            const quality = qualitySlider.value;
 
-            reader.onload = async (e) => {
-                try {
-                    const response = await fetch(`/image?token=${token}`, {
-                        method: 'PUT',
-                        body: e.target.result
-                    });
+            statusEl.textContent = '正在压缩图片...';
+            statusEl.className = 'status';
+            statusEl.style.display = 'block';
 
-                    statusEl.style.display = 'block';
-                    if (response.ok) {
-                        statusEl.textContent = '二维码更新成功！';
-                        statusEl.className = 'status success';
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        statusEl.textContent = `错误：${await response.text()}`;
+            compressImage(file, quality, async (blob) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        statusEl.textContent = '正在上传...';
+                        
+                        const response = await fetch(`/image?token=${token}`, {
+                            method: 'PUT',
+                            body: e.target.result
+                        });
+
+                        statusEl.style.display = 'block';
+                        if (response.ok) {
+                            statusEl.textContent = '二维码更新成功！';
+                            statusEl.className = 'status success';
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            statusEl.textContent = `错误：${await response.text()}`;
+                            statusEl.className = 'status error';
+                        }
+                    } catch (err) {
+                        statusEl.textContent = `网络错误：${err.message}`;
                         statusEl.className = 'status error';
+                        statusEl.style.display = 'block';
                     }
-                } catch (err) {
-                    statusEl.textContent = `网络错误：${err.message}`;
-                    statusEl.className = 'status error';
-                    statusEl.style.display = 'block';
-                }
-            };
-
-            reader.readAsDataURL(file);
+                };
+                reader.readAsDataURL(blob);
+            });
         });
 
         // 初始化加载当前二维码
@@ -320,8 +423,22 @@
             const files = e.dataTransfer.files;
             if (files.length) {
                 imageInput.files = files;
-                updateUI(files[0]);
-                previewImage();
+                const file = files[0];
+                updateUI(file);
+                
+                compressImage(file, qualitySlider.value, (blob) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        previewImage(e.target.result);
+                        const originalSize = (file.size / 1024).toFixed(2);
+                        const compressedSize = (blob.size / 1024).toFixed(2);
+                        fileInfo.innerHTML = `
+                            原始大小: ${originalSize} KB<br>
+                            压缩后: ${compressedSize} KB (节省 ${((1 - blob.size/file.size)*100).toFixed(1)}%)
+                        `;
+                    };
+                    reader.readAsDataURL(blob);
+                });
             }
         });
     </script>
