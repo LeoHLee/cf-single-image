@@ -151,6 +151,7 @@
             <div class="upload-icon">📁</div>
             <div class="upload-text">点击或拖拽图片到此处</div>
             <div class="file-name" id="fileName"></div>
+            <div id="status" class="status"></div>
         </div>
         
         <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif" style="display: none;" />
@@ -211,10 +212,6 @@
         function updateUI(file) {
             fileName.textContent = file.name;
             uploadBtn.disabled = false;
-            
-            // 隐藏之前的信息和预览
-            infoContainer.style.display = 'none';
-            previewContainer.style.display = 'none';
         }
 
         // 上传处理
