@@ -5,7 +5,7 @@ compatibility_date = "2025-05-03"
 [[d1_databases]]
 binding = "DB"
 database_name = "image_storage"
-database_id = "${DB_ID}"
+database_id = "929b655f-bae1-4bc5-99a7-69a7ed939ec5"
 
 [assets]
 directory = "./static"
