@@ -25,11 +25,78 @@
             text-align: center;
             margin-bottom: 2rem;
         }
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto; 
+            text-align: center;
+        }
 
         .header h1 {
             color: var(--primary-color);
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
+        }
+        .upload-area {
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #3498db;
+            background-color: #f8fafc;
+        }
+        .upload-area.active {
+            border-color: #2ecc71;
+            background-color: #e8f8f0;
+        }
+        .upload-icon {
+            font-size: 48px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        .upload-text {
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        .file-name {
+            margin-top: 10px;
+            color: #3498db;
+            font-weight: 500;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn i {
+            margin-right: 8px;
         }
 
         .qr-preview {
@@ -48,53 +115,6 @@
             border-radius: 8px;
             padding: 10px;
             background: white;
-        }
-
-        .upload-area {
-            border: 3px dashed #ccc;
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            transition: border-color 0.3s;
-            position: relative;
-            background: white;
-        }
-
-        .upload-area:hover {
-            border-color: var(--primary-color);
-        }
-
-        #imageInput {
-            display: none;
-        }
-
-        .upload-label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-            cursor: pointer;
-        }
-
-        .upload-icon {
-            width: 64px;
-            height: 64px;
-            fill: var(--primary-color);
-        }
-
-        .button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: opacity 0.3s;
-        }
-
-        .button:hover {
-            opacity: 0.9;
         }
 
         .status {
@@ -126,25 +146,31 @@
         <h1>二维码上传管理</h1>
         <p class="hint">仅支持有效的二维码图片上传</p>
     </div>
+    <div class="container">
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">点击或拖拽图片到此处</div>
+            <div class="file-name" id="fileName"></div>
+        </div>
+        
+        <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif" style="display: none;" />
+        
+        <button class="btn" id="uploadBtn" disabled>
+            <i>↑</i> 上传二维码
+        </button>
 
-    <div class="upload-area">
-        <label class="upload-label" for="imageInput">
-            <svg class="upload-icon" viewBox="0 0 24 24">
-                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
-            </svg>
-            <span>点击选择文件或拖放二维码图片到此区域</span>
-            <button class="button" id="uploadBtn">立即更新</button>
-        </label>
-        <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif">
-        <div id="status" class="status"></div>
-    </div>
-
-    <div class="qr-preview">
-        <h3>当前二维码：</h3>
-        <img id="currentImage" src="" alt="暂无二维码">
+        <div class="qr-preview">
+            <h3>当前二维码：</h3>
+            <img id="currentImage" src="" alt="暂无二维码">
+        </div>
     </div>
 
     <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileName = document.getElementById('fileName');
+
         // 授权检查
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
@@ -169,9 +195,31 @@
             }
         };
 
+        // 上传区域点击事件
+        uploadArea.addEventListener('click', () => {
+            imageInput.click();
+        });
+        
+        // 文件选择事件
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                updateUI(e.target.files[0]);
+            }
+        });
+
+        // 更新UI显示
+        function updateUI(file) {
+            fileName.textContent = file.name;
+            uploadBtn.disabled = false;
+            
+            // 隐藏之前的信息和预览
+            infoContainer.style.display = 'none';
+            previewContainer.style.display = 'none';
+        }
+
         // 上传处理
-        document.getElementById('uploadBtn').addEventListener('click', async () => {
-            const fileInput = document.getElementById('imageInput');
+        uploadBtn.addEventListener('click', async () => {
+            const fileInput = imageInput;
             const statusEl = document.getElementById('status');
             
             if (!fileInput.files.length) {
@@ -223,7 +271,7 @@
             }
         })();
 
-        // 拖放功能 (修正版)
+        // 拖放功能
         const dropArea = document.querySelector('.upload-area');
         const rootStyle = getComputedStyle(document.documentElement);
         const primaryColor = rootStyle.getPropertyValue('--primary-color').trim();
