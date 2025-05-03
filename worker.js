@@ -1,6 +1,6 @@
 export default {
   async fetch(request, env) {
-    await DB.prepare(`
+    await env.DB.prepare(`
       CREATE TABLE IF NOT EXISTS images (
         id INTEGER PRIMARY KEY,
         image_data TEXT NOT NULL
