@@ -4,8 +4,8 @@ compatibility_date = "2025-05-03"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "qrcode_hub"
-database_id = "bfbfd2f4-74d9-41a0-a34f-092c64c04fea"
+database_name = "image_storage"
+database_id = "${DB_ID}"
 
 [assets]
 directory = "./static"
