@@ -6,3 +6,7 @@ compatibility_date = "2025-05-03"
 binding = "DB"
 database_name = "qrcode_hub"
 database_id = "bfbfd2f4-74d9-41a0-a34f-092c64c04fea"
+
+[assets]
+directory = "./static"
+binding = "ASSETS"
