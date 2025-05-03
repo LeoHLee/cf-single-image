@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>二维码管理后台</title>
     <style>
         :root {
@@ -15,37 +15,37 @@
             font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
+            margin: 0;
+            padding: 15px;
             line-height: 1.6;
+            min-height: 100vh;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
         .container {
             background-color: white;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
+            padding: 20px;
             width: 100%;
-            max-width: 500px;
             margin: 0 auto; 
             text-align: center;
+            box-sizing: border-box;
         }
 
         .header h1 {
             color: var(--primary-color);
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             margin-bottom: 0.5rem;
         }
         .upload-area {
             border: 2px dashed #bdc3c7;
             border-radius: 8px;
-            padding: 30px;
-            margin-bottom: 20px;
+            padding: 20px 15px;
+            margin-bottom: 15px;
             transition: all 0.3s;
             cursor: pointer;
         }
@@ -58,18 +58,21 @@
             background-color: #e8f8f0;
         }
         .upload-icon {
-            font-size: 48px;
+            font-size: 36px;
             color: #7f8c8d;
             margin-bottom: 10px;
         }
         .upload-text {
             color: #7f8c8d;
             margin-bottom: 5px;
+            font-size: 0.95rem;
         }
         .file-name {
             margin-top: 10px;
             color: #3498db;
             font-weight: 500;
+            font-size: 0.9rem;
+            word-break: break-all;
         }
         .btn {
             background-color: #3498db;
@@ -85,6 +88,9 @@
             align-items: center;
             justify-content: center;
             margin-top: 10px;
+            width: 100%;
+            max-width: 300px;
+            box-sizing: border-box;
         }
         .btn:hover {
             background-color: #2980b9;
@@ -102,26 +108,28 @@
         .qr-preview {
             background: white;
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             text-align: center;
         }
 
         #currentImage {
-            max-width: 300px;
+            max-width: 100%;
             height: auto;
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 10px;
             background: white;
+            max-height: 300px;
         }
 
         .status {
             margin-top: 1rem;
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
             display: none;
+            font-size: 0.9rem;
         }
 
         .success {
@@ -136,8 +144,27 @@
 
         .hint {
             color: #666;
-            font-size: 0.9rem;
-            margin-top: 1rem;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            .container {
+                max-width: 500px;
+                padding: 30px;
+            }
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            .upload-area {
+                padding: 30px;
+            }
+            .btn {
+                width: auto;
+            }
         }
     </style>
 </head>
@@ -177,8 +204,8 @@
         const token = urlParams.get('token');
         if (!token) {
             document.body.innerHTML = `
-                <div class="error">
-                    <h2>未授权访问</h2>
+                <div class="container" style="text-align: center; padding: 30px 20px;">
+                    <h2 style="color: #c62828;">未授权访问</h2>
                     <p>请提供有效的访问令牌</p>
                 </div>
             `;
@@ -205,6 +232,7 @@
         imageInput.addEventListener('change', (e) => {
             if (e.target.files.length) {
                 updateUI(e.target.files[0]);
+                previewImage();
             }
         });
 
@@ -276,15 +304,25 @@
         ['dragenter', 'dragover'].forEach(event => {
           dropArea.addEventListener(event, (e) => {
             e.preventDefault();
-            dropArea.style.borderColor = primaryColor; // 使用已获取的颜色值
+            dropArea.style.borderColor = primaryColor;
           });
         });
 
         ['dragleave', 'drop'].forEach(event => {
           dropArea.addEventListener(event, (e) => {
             e.preventDefault();
-            dropArea.style.borderColor = '#ccc';
+            dropArea.style.borderColor = '#bdc3c7';
           });
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                imageInput.files = files;
+                updateUI(files[0]);
+                previewImage();
+            }
         });
     </script>
 </body>
