@@ -7,7 +7,7 @@ export default {
       // GET endpoint - retrieve the image
       if (request.method === 'GET' && path === '/image') {
         const token = url.searchParams.get('token');
-        if (token !== env.VIEWTOKEN) {
+        if (token !== env.VIEWTOKEN && token !== env.ADMINTOKEN) {
           return new Response('Unauthorized', { status: 401 });
         }
         

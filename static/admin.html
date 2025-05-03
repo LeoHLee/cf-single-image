@@ -1,97 +1,246 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-  <title>Image Admin</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-    .container { display: flex; flex-direction: column; gap: 20px; }
-    .preview { max-width: 100%; max-height: 300px; border: 1px solid #ddd; }
-    .upload-area { border: 2px dashed #ccc; padding: 20px; text-align: center; }
-    .status { margin-top: 10px; padding: 10px; border-radius: 4px; }
-    .success { background-color: #dff0d8; color: #3c763d; }
-    .error { background-color: #f2dede; color: #a94442; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二维码管理后台</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --bg-color: #f5f7fa;
+            --text-color: #2d3436;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .qr-preview {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        #currentImage {
+            max-width: 300px;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+        }
+
+        .upload-area {
+            border: 3px dashed #ccc;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: border-color 0.3s;
+            position: relative;
+            background: white;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        .upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            fill: var(--primary-color);
+        }
+
+        .button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: opacity 0.3s;
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        .status {
+            margin-top: 1rem;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .hint {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Image Admin</h1>
-    
-    <div>
-      <h3>Current Image:</h3>
-      <img id="currentImage" class="preview" src="" alt="Current Image">
+    <div class="header">
+        <h1>二维码上传管理</h1>
+        <p class="hint">仅支持有效的二维码图片上传</p>
     </div>
-    
+
+    <div class="qr-preview">
+        <h3>当前二维码：</h3>
+        <img id="currentImage" src="" alt="暂无二维码">
+    </div>
+
     <div class="upload-area">
-      <h3>Upload New Image</h3>
-      <input type="file" id="imageInput" accept="image/*">
-      <button id="uploadBtn">Update Image</button>
-      <div id="status" class="status"></div>
+        <label class="upload-label" for="imageInput">
+            <svg class="upload-icon" viewBox="0 0 24 24">
+                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+            </svg>
+            <span>点击选择文件或拖放二维码图片到此区域</span>
+            <button class="button" id="uploadBtn">立即更新</button>
+        </label>
+        <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif">
+        <div id="status" class="status"></div>
     </div>
-  </div>
-  
-  <script>
-    const token = new URLSearchParams(window.location.search).get('token');
-    if (!token) {
-      document.body.innerHTML = '<h1>Unauthorized</h1><p>Token parameter is required</p>';
-    }
-    
-    // Load current image
-    async function loadCurrentImage() {
-      try {
-        const response = await fetch(`/image?token=${token}`);
-        if (response.ok) {
-          const imageData = await response.text();
-          document.getElementById('currentImage').src = imageData;
-        } else {
-          document.getElementById('currentImage').alt = 'No image available';
+
+    <script>
+        // 授权检查
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        if (!token) {
+            document.body.innerHTML = `
+                <div class="error">
+                    <h2>未授权访问</h2>
+                    <p>请提供有效的访问令牌</p>
+                </div>
+            `;
         }
-      } catch (err) {
-        console.error('Error loading image:', err);
-      }
-    }
-    
-    // Handle image upload
-    document.getElementById('uploadBtn').addEventListener('click', async () => {
-      const fileInput = document.getElementById('imageInput');
-      const statusEl = document.getElementById('status');
-      
-      if (!fileInput.files || fileInput.files.length === 0) {
-        statusEl.textContent = 'Please select an image file';
-        statusEl.className = 'status error';
-        return;
-      }
-      
-      const file = fileInput.files[0];
-      const reader = new FileReader();
-      
-      reader.onload = async (e) => {
-        const imageData = e.target.result;
-        
-        try {
-          const response = await fetch(`/image?token=${token}`, {
-            method: 'PUT',
-            body: imageData
+
+        // 实时预览
+        const previewImage = () => {
+            const file = document.getElementById('imageInput').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('currentImage').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        // 上传处理
+        document.getElementById('uploadBtn').addEventListener('click', async () => {
+            const fileInput = document.getElementById('imageInput');
+            const statusEl = document.getElementById('status');
+            
+            if (!fileInput.files.length) {
+                statusEl.textContent = '请先选择二维码图片';
+                statusEl.className = 'status error';
+                statusEl.style.display = 'block';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                try {
+                    const response = await fetch(`/image?token=${token}`, {
+                        method: 'PUT',
+                        body: e.target.result
+                    });
+
+                    statusEl.style.display = 'block';
+                    if (response.ok) {
+                        statusEl.textContent = '二维码更新成功！';
+                        statusEl.className = 'status success';
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        statusEl.textContent = `错误：${await response.text()}`;
+                        statusEl.className = 'status error';
+                    }
+                } catch (err) {
+                    statusEl.textContent = `网络错误：${err.message}`;
+                    statusEl.className = 'status error';
+                    statusEl.style.display = 'block';
+                }
+            };
+
+            reader.readAsDataURL(file);
+        });
+
+        // 初始化加载当前二维码
+        (async () => {
+            try {
+                const response = await fetch(`/image?token=${token}`);
+                if (response.ok) {
+                    const data = await response.text();
+                    document.getElementById('currentImage').src = data;
+                }
+            } catch (err) {
+                console.error('加载二维码失败:', err);
+            }
+        })();
+
+        // 拖放功能 (修正版)
+        const dropArea = document.querySelector('.upload-area');
+        const rootStyle = getComputedStyle(document.documentElement);
+        const primaryColor = rootStyle.getPropertyValue('--primary-color').trim();
+
+        ['dragenter', 'dragover'].forEach(event => {
+          dropArea.addEventListener(event, (e) => {
+            e.preventDefault();
+            dropArea.style.borderColor = primaryColor; // 使用已获取的颜色值
           });
-          
-          if (response.ok) {
-            statusEl.textContent = 'Image updated successfully!';
-            statusEl.className = 'status success';
-            loadCurrentImage();
-          } else {
-            statusEl.textContent = `Error: ${await response.text()}`;
-            statusEl.className = 'status error';
-          }
-        } catch (err) {
-          statusEl.textContent = `Error: ${err.message}`;
-          statusEl.className = 'status error';
-        }
-      };
-      
-      reader.readAsDataURL(file);
-    });
-    
-    // Initialize
-    loadCurrentImage();
-  </script>
+        });
+
+        ['dragleave', 'drop'].forEach(event => {
+          dropArea.addEventListener(event, (e) => {
+            e.preventDefault();
+            dropArea.style.borderColor = '#ccc';
+          });
+        });
+    </script>
 </body>
 </html>
