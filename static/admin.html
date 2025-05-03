@@ -127,11 +127,6 @@
         <p class="hint">仅支持有效的二维码图片上传</p>
     </div>
 
-    <div class="qr-preview">
-        <h3>当前二维码：</h3>
-        <img id="currentImage" src="" alt="暂无二维码">
-    </div>
-
     <div class="upload-area">
         <label class="upload-label" for="imageInput">
             <svg class="upload-icon" viewBox="0 0 24 24">
@@ -142,6 +137,11 @@
         </label>
         <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif">
         <div id="status" class="status"></div>
+    </div>
+
+    <div class="qr-preview">
+        <h3>当前二维码：</h3>
+        <img id="currentImage" src="" alt="暂无二维码">
     </div>
 
     <script>
