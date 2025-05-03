@@ -1,8 +1,19 @@
 export default {
   async fetch(request, env) {
+    await DB.prepare(`
+      CREATE TABLE IF NOT EXISTS mappings (
+        path TEXT PRIMARY KEY,
+        target TEXT NOT NULL,
+        name TEXT,
+        enabled INTEGER DEFAULT 1,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        qrCodeData TEXT
+      )
+    `).run();
+    
     const url = new URL(request.url);
     const path = url.pathname;
-    
+
     try {
       // GET endpoint - retrieve the image
       if (request.method === 'GET' && path === '/image') {
