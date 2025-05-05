@@ -10,7 +10,7 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     const clientIP = request.headers.get('CF-Connecting-IP') || '';
-    const clientASNUM = request.cf?.asn || '';
+    const clientOrg = request.cf?.asOrganization || '';
     const inPKU = isPKUIP(clientIP);
 
     try {
@@ -18,7 +18,7 @@ export default {
       if (request.method === 'GET' && path === '/inpku') {
         return new Response(JSON.stringify({
           ip: clientIP,
-          asnum: clientASNUM,
+          org: clientOrg,
           pku: inPKU
         }), {
           headers: {
