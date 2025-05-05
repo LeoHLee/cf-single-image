@@ -99,29 +99,18 @@ const pkuCIDRv6 = [
 function ipToBigInt(ip) {
   if (ip.includes(':')) {
     // IPv6 处理
-    const parts = ip.split(':');
-    let fullParts = [];
-    let expandZero = false;
+    const parts = ip.split('::');
+    let head = parts[0] ? parts[0].split(':') : [];
+    let tail = parts[1] ? parts[1].split(':') : [];
     
-    // 处理 :: 缩写
-    for (const part of parts) {
-      if (part === '') {
-        expandZero = true;
-        continue;
-      }
-      fullParts.push(part.padStart(4, '0'));
-    }
+    const missing = 8 - (head.length + tail.length);
+    const fullParts = [
+      ...head,
+      ...Array(missing).fill('0'),
+      ...tail
+    ].map(part => part.padStart(4, '0'));
     
-    const zeroCount = 8 - fullParts.length;
-    if (expandZero) {
-      fullParts = [
-        ...fullParts.slice(0, fullParts.findIndex(p => p === '')),
-        ...Array(zeroCount).fill('0000'),
-        ...fullParts.slice(fullParts.findIndex(p => p === ''))
-      ];
-    }
-    
-    const fullIPv6 = fullParts.join('').padStart(32, '0');
+    const fullIPv6 = fullParts.join('');
     return BigInt(`0x${fullIPv6}`);
   } else {
     // IPv4 处理
