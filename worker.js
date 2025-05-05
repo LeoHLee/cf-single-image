@@ -10,7 +10,7 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     const clientIP = request.headers.get('CF-Connecting-IP') || '';
-    const clientASNUM = request.headers.get('CF-IPASNUM') || '';
+    const clientASNUM = request.cf?.asn || '';
     const inPKU = isPKUIP(clientIP);
 
     try {
