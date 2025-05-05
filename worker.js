@@ -1,12 +1,5 @@
 export default {
   async fetch(request, env) {
-    await env.DB.prepare(`
-      CREATE TABLE IF NOT EXISTS images (
-        id INTEGER PRIMARY KEY,
-        image_data TEXT NOT NULL
-      )
-    `).run();
-    
     const url = new URL(request.url);
     const path = url.pathname;
     const clientIP = request.headers.get('CF-Connecting-IP') || '';
@@ -27,6 +20,14 @@ export default {
           }
         });
       }
+      
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS images (
+          id INTEGER PRIMARY KEY,
+          image_data TEXT NOT NULL
+        )
+      `).run();
+      
       if (request.method === 'GET' && path === '/image') {
         const token = url.searchParams.get('token');
         if (!inPKU && token !== env.VIEWTOKEN && token !== env.ADMINTOKEN) {
