@@ -186,26 +186,37 @@
         }
     </style>
 </head>
-<body>
-    <div class="header">
-        <h1>二维码上传管理</h1>
-        <p class="hint">仅支持有效的二维码图片上传</p>
-    </div>
-    <div class="container">
-        <div class="upload-area" id="uploadArea">
-            <div class="upload-icon">📁</div>
-            <div class="upload-text">点击或拖拽图片到此处</div>
-            <div class="file-name" id="fileName"></div>
-            <div class="file-info" id="fileInfo"></div>
-            <div id="status" class="status"></div>
-        </div>
-        
-        <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif" style="display: none;" />
-        
-        <div class="quality-control">
-            <label for="quality" class="quality-label">图片质量: <span id="qualityValue">80</span>%</label>
-            <input type="range" id="quality" class="quality-slider" min="10" max="100" value="80">
-        </div>
+<body class="bg-gray-50 min-h-screen font-inter">
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
+        <!-- 页面标题 -->
+        <header class="text-center mb-8">
+            <h1 class="text-[clamp(1.75rem,5vw,2.5rem)] font-bold text-gray-800 mb-2">二维码上传工具</h1>
+            <p class="text-gray-600 max-w-2xl mx-auto">上传二维码图片，系统会自动压缩并提交到服务器</p>
+        </header>
+
+        <!-- 主要内容区 -->
+        <main class="bg-white rounded-xl shadow-lg p-6 mb-8 transform hover:shadow-xl transition-custom">
+            <!-- 上传区域 -->
+            <div id="upload-container" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-custom">
+                <div class="mb-4">
+                    <i class="fa fa-cloud-upload text-4xl text-gray-400 mb-3"></i>
+                    <p class="text-gray-600">点击或拖拽二维码图片到此处</p>
+                    <p class="text-sm text-gray-500 mt-1">支持 JPG, PNG, WebP 格式</p>
+                </div>
+                <input type="file" id="file-input" accept="image/*" class="hidden">
+                <button id="upload-btn" class="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-6 rounded-lg transition-custom shadow-md hover:shadow-lg">
+                    选择图片
+                </button>
+            </div>
+
+            <!-- 图片预览区域 (初始隐藏) -->
+            <div id="preview-container" class="mt-6 hidden">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">图片预览</h3>
+                <div class="relative">
+                    <div id="image-preview" class="w-full h-64 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center mb-4">
+                        <img id="preview-image" src="" alt="预览图片" class="max-w-full max-h-full object-contain">
+                    </div>
+                </div>
 
         <button class="btn" id="uploadBtn" disabled>
             <i>↑</i> 上传二维码
@@ -215,6 +226,26 @@
             <h3>当前二维码：</h3>
             <img id="currentImage" src="" alt="暂无二维码">
         </div>
+
+        <!-- 服务器当前图片预览 -->
+        <div id="server-image-container" class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">服务器当前图片</h3>
+            <div class="w-full h-64 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center mb-4 relative">
+                <div id="server-image-loading" class="absolute inset-0 flex items-center justify-center bg-gray-100/80">
+                    <i class="fa fa-spinner fa-spin text-2xl text-gray-500"></i>
+                </div>
+                <img id="server-image" src="" alt="服务器当前图片" class="max-w-full max-h-full object-contain">
+                <div id="server-image-error" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80">
+                    <i class="fa fa-exclamation-triangle text-2xl text-red-500 mb-2"></i>
+                    <p class="text-gray-600">无法加载服务器图片</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="text-center text-gray-500 text-sm">
+            <p>本页面代码由豆包AI生成</p>
+        </footer>
     </div>
 
     <script>
