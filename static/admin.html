@@ -2,445 +2,444 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>二维码管理后台</title>
-    <style>
-        :root {
-            --primary-color: #4CAF50;
-            --bg-color: #f5f7fa;
-            --text-color: #2d3436;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 15px;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        .container {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            width: 100%;
-            margin: 0 auto; 
-            text-align: center;
-            box-sizing: border-box;
-        }
-
-        .header h1 {
-            color: var(--primary-color);
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-        }
-        .upload-area {
-            border: 2px dashed #bdc3c7;
-            border-radius: 8px;
-            padding: 20px 15px;
-            margin-bottom: 15px;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        .upload-area:hover {
-            border-color: #3498db;
-            background-color: #f8fafc;
-        }
-        .upload-area.active {
-            border-color: #2ecc71;
-            background-color: #e8f8f0;
-        }
-        .upload-icon {
-            font-size: 36px;
-            color: #7f8c8d;
-            margin-bottom: 10px;
-        }
-        .upload-text {
-            color: #7f8c8d;
-            margin-bottom: 5px;
-            font-size: 0.95rem;
-        }
-        .file-name {
-            margin-top: 10px;
-            color: #3498db;
-            font-weight: 500;
-            font-size: 0.9rem;
-            word-break: break-all;
-        }
-        .file-info {
-            margin-top: 5px;
-            font-size: 0.8rem;
-            color: #7f8c8d;
-        }
-        .btn {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
-            width: 100%;
-            max-width: 300px;
-            box-sizing: border-box;
-        }
-        .btn:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-        }
-        .btn:disabled {
-            background-color: #bdc3c7;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn i {
-            margin-right: 8px;
-        }
-
-        .qr-preview {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        #currentImage {
-            max-width: 100%;
-            height: auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px;
-            background: white;
-            max-height: 300px;
-        }
-
-        .status {
-            margin-top: 1rem;
-            padding: 10px;
-            border-radius: 8px;
-            display: none;
-            font-size: 0.9rem;
-        }
-
-        .success {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .error {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .hint {
-            color: #666;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-        }
-
-        .quality-control {
-            margin: 15px 0;
-            text-align: left;
-        }
-        .quality-label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-        }
-        .quality-slider {
-            width: 100%;
-        }
-
-        @media (min-width: 768px) {
-            body {
-                padding: 20px;
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二维码上传</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        neutral: '#6B7280',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
             }
-            .container {
-                max-width: 500px;
-                padding: 30px;
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
             }
-            .header h1 {
-                font-size: 2.2rem;
+            .drop-shadow-custom {
+                filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));
             }
-            .upload-area {
-                padding: 30px;
-            }
-            .btn {
-                width: auto;
+            .transition-custom {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
         }
     </style>
 </head>
-<body>
-    <div class="header">
-        <h1>二维码上传管理</h1>
-        <p class="hint">仅支持有效的二维码图片上传</p>
-    </div>
-    <div class="container">
-        <div class="upload-area" id="uploadArea">
-            <div class="upload-icon">📁</div>
-            <div class="upload-text">点击或拖拽图片到此处</div>
-            <div class="file-name" id="fileName"></div>
-            <div class="file-info" id="fileInfo"></div>
-            <div id="status" class="status"></div>
-        </div>
-        
-        <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif" style="display: none;" />
-        
-        <div class="quality-control">
-            <label for="quality" class="quality-label">图片质量: <span id="qualityValue">80</span>%</label>
-            <input type="range" id="quality" class="quality-slider" min="10" max="100" value="80">
+<body class="bg-gray-50 min-h-screen font-inter">
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
+        <!-- 页面标题 -->
+        <header class="text-center mb-8">
+            <h1 class="text-[clamp(1.75rem,5vw,2.5rem)] font-bold text-gray-800 mb-2">二维码上传工具</h1>
+            <p class="text-gray-600 max-w-2xl mx-auto">上传二维码图片，系统会自动压缩并提交到服务器</p>
+        </header>
+
+        <!-- 结果区域 -->
+        <div id="result-container" class="bg-white rounded-xl shadow-lg p-6 mb-8 hidden">
+            <div id="success-message" class="hidden">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fa fa-check-circle text-green-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-gray-800">上传成功</h3>
+                        <div class="mt-2 text-sm text-gray-600">
+                            <p>图片已成功上传至服务器</p>
+                            <p class="mt-1">服务器返回状态码: <span id="status-code" class="font-medium"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="error-message" class="hidden">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fa fa-exclamation-circle text-red-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-gray-800">上传失败</h3>
+                        <div class="mt-2 text-sm text-gray-600">
+                            <p id="error-text">上传过程中发生错误</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <button class="btn" id="uploadBtn" disabled>
-            <i>↑</i> 上传二维码
-        </button>
+        <!-- 主要内容区 -->
+        <main class="bg-white rounded-xl shadow-lg p-6 mb-8 transform hover:shadow-xl transition-custom">
+            <!-- 上传区域 -->
+            <div id="upload-container" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-custom">
+                <div class="mb-4">
+                    <i class="fa fa-cloud-upload text-4xl text-gray-400 mb-3"></i>
+                    <p class="text-gray-600">点击或拖拽二维码图片到此处</p>
+                    <p class="text-sm text-gray-500 mt-1">支持 JPG, PNG, WebP 格式</p>
+                </div>
+                <input type="file" id="file-input" accept="image/*" class="hidden">
+                <button id="upload-btn" class="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-6 rounded-lg transition-custom shadow-md hover:shadow-lg">
+                    选择图片
+                </button>
+            </div>
 
-        <div class="qr-preview">
-            <h3>当前二维码：</h3>
-            <img id="currentImage" src="" alt="暂无二维码">
+            <!-- 图片预览区域 (初始隐藏) -->
+            <div id="preview-container" class="mt-6 hidden">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">图片预览</h3>
+                <div class="relative">
+                    <div id="image-preview" class="w-full h-64 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center mb-4">
+                        <img id="preview-image" src="" alt="预览图片" class="max-w-full max-h-full object-contain">
+                    </div>
+                </div>
+
+                <!-- 压缩质量控制 -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="quality-slider" class="text-sm text-gray-600">压缩质量</label>
+                        <span id="quality-value" class="text-sm font-medium text-gray-800">80%</span>
+                    </div>
+                    <input type="range" id="quality-slider" min="10" max="100" value="80" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary">
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>低质量 (小文件)</span>
+                        <span>高质量 (大文件)</span>
+                    </div>
+                </div>
+
+                <!-- 图片信息 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm text-gray-500">原始大小</p>
+                        <p id="original-size" class="font-medium text-gray-800">-</p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm text-gray-500">预计压缩后大小</p>
+                        <p id="compressed-size" class="font-medium text-gray-800">-</p>
+                    </div>
+                </div>
+
+                <!-- 上传按钮 -->
+                <button id="submit-btn" class="w-full bg-secondary hover:bg-secondary/90 text-white font-medium py-3 px-6 rounded-lg transition-custom shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <i class="fa fa-paper-plane mr-2"></i> 上传到服务器
+                </button>
+            </div>
+        </main>
+
+        <!-- 服务器当前图片预览 -->
+        <div id="server-image-container" class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">服务器当前图片</h3>
+            <div class="w-full h-64 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center mb-4 relative">
+                <div id="server-image-loading" class="absolute inset-0 flex items-center justify-center bg-gray-100/80">
+                    <i class="fa fa-spinner fa-spin text-2xl text-gray-500"></i>
+                </div>
+                <img id="server-image" src="" alt="服务器当前图片" class="max-w-full max-h-full object-contain">
+                <div id="server-image-error" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80">
+                    <i class="fa fa-exclamation-triangle text-2xl text-red-500 mb-2"></i>
+                    <p class="text-gray-600">无法加载服务器图片</p>
+                </div>
+            </div>
         </div>
+
+        <!-- 页脚 -->
+        <footer class="text-center text-gray-500 text-sm">
+            <p>本页面代码由豆包大模型生成</p>
+        </footer>
     </div>
 
     <script>
-        const uploadArea = document.getElementById('uploadArea');
-        const imageInput = document.getElementById('imageInput');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const fileName = document.getElementById('fileName');
-        const fileInfo = document.getElementById('fileInfo');
-        const qualitySlider = document.getElementById('quality');
-        const qualityValue = document.getElementById('qualityValue');
-
-        // 授权检查
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
-        if (!token) {
-            document.body.innerHTML = `
-                <div class="container" style="text-align: center; padding: 30px 20px;">
-                    <h2 style="color: #c62828;">未授权访问</h2>
-                    <p>请提供有效的访问令牌</p>
-                </div>
-            `;
-        }
-
-        // 图片压缩函数
-        function compressImage(file, quality, callback) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    // 限制最大尺寸为1000px
-                    const MAX_WIDTH = 1000;
-                    const MAX_HEIGHT = 1000;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
-                    } else {
-                        if (height > MAX_HEIGHT) {
-                            width *= MAX_HEIGHT / height;
-                            height = MAX_HEIGHT;
-                        }
-                    }
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // 转换为Blob对象
-                    canvas.toBlob(callback, file.type, quality/100);
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // 实时预览
-        const previewImage = (src) => {
-            document.getElementById('currentImage').src = src;
-        };
-
-        // 上传区域点击事件
-        uploadArea.addEventListener('click', () => {
-            imageInput.click();
-        });
-        
-        // 文件选择事件
-        imageInput.addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                const file = e.target.files[0];
-                updateUI(file);
-                
-                // 压缩图片并预览
-                compressImage(file, qualitySlider.value, (blob) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        previewImage(e.target.result);
-                        // 更新文件信息
-                        const originalSize = (file.size / 1024).toFixed(2);
-                        const compressedSize = (blob.size / 1024).toFixed(2);
-                        fileInfo.innerHTML = `
-                            原始大小: ${originalSize} KB<br>
-                            压缩后: ${compressedSize} KB (节省 ${((1 - blob.size/file.size)*100).toFixed(1)}%)
-                        `;
-                    };
-                    reader.readAsDataURL(blob);
-                });
-            }
-        });
-
-        // 更新UI显示
-        function updateUI(file) {
-            fileName.textContent = file.name;
-            uploadBtn.disabled = false;
-        }
-
-        // 质量滑块事件
-        qualitySlider.addEventListener('input', () => {
-            qualityValue.textContent = qualitySlider.value;
-            if (imageInput.files.length) {
-                const file = imageInput.files[0];
-                compressImage(file, qualitySlider.value, (blob) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        previewImage(e.target.result);
-                        const originalSize = (file.size / 1024).toFixed(2);
-                        const compressedSize = (blob.size / 1024).toFixed(2);
-                        fileInfo.innerHTML = `
-                            原始大小: ${originalSize} KB<br>
-                            压缩后: ${compressedSize} KB (节省 ${((1 - blob.size/file.size)*100).toFixed(1)}%)
-                        `;
-                    };
-                    reader.readAsDataURL(blob);
-                });
-            }
-        });
-
-        // 上传处理
-        uploadBtn.addEventListener('click', async () => {
-            const fileInput = imageInput;
-            const statusEl = document.getElementById('status');
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取URL中的token参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
             
-            if (!fileInput.files.length) {
-                statusEl.textContent = '请先选择二维码图片';
-                statusEl.className = 'status error';
-                statusEl.style.display = 'block';
-                return;
+            // 如果没有token，显示错误信息
+            if (!token) {
+                alert('错误: URL中缺少token参数');
+                document.getElementById('upload-btn').disabled = true;
+                document.getElementById('upload-btn').classList.add('opacity-50', 'cursor-not-allowed');
+                document.getElementById('upload-btn').innerHTML = '<i class="fa fa-exclamation-triangle mr-1"></i> 缺少token参数';
+            } else {
+                // 尝试加载服务器上的当前图片
+                loadServerImage();
             }
 
-            const file = fileInput.files[0];
-            const quality = qualitySlider.value;
+            // DOM元素
+            const uploadContainer = document.getElementById('upload-container');
+            const fileInput = document.getElementById('file-input');
+            const uploadBtn = document.getElementById('upload-btn');
+            const previewContainer = document.getElementById('preview-container');
+            const previewImage = document.getElementById('preview-image');
+            const originalSize = document.getElementById('original-size');
+            const compressedSize = document.getElementById('compressed-size');
+            const submitBtn = document.getElementById('submit-btn');
+            const resultContainer = document.getElementById('result-container');
+            const successMessage = document.getElementById('success-message');
+            const errorMessage = document.getElementById('error-message');
+            const statusCode = document.getElementById('status-code');
+            const errorText = document.getElementById('error-text');
+            const qualitySlider = document.getElementById('quality-slider');
+            const qualityValue = document.getElementById('quality-value');
+            const serverImage = document.getElementById('server-image');
+            const serverImageLoading = document.getElementById('server-image-loading');
+            const serverImageError = document.getElementById('server-image-error');
 
-            statusEl.textContent = '正在压缩图片...';
-            statusEl.className = 'status';
-            statusEl.style.display = 'block';
+            // 存储原始图片数据和压缩质量
+            let originalImageData = null;
+            let currentQuality = 80;
 
-            compressImage(file, quality, async (blob) => {
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        statusEl.textContent = '正在上传...';
-                        
-                        const response = await fetch(`/image?token=${token}`, {
-                            method: 'PUT',
-                            body: e.target.result
-                        });
-
-                        statusEl.style.display = 'block';
-                        if (response.ok) {
-                            statusEl.textContent = '二维码更新成功！';
-                            statusEl.className = 'status success';
-                            setTimeout(() => location.reload(), 1500);
-                        } else {
-                            statusEl.textContent = `错误：${await response.text()}`;
-                            statusEl.className = 'status error';
-                        }
-                    } catch (err) {
-                        statusEl.textContent = `网络错误：${err.message}`;
-                        statusEl.className = 'status error';
-                        statusEl.style.display = 'block';
-                    }
-                };
-                reader.readAsDataURL(blob);
-            });
-        });
-
-        // 初始化加载当前二维码
-        (async () => {
-            try {
-                const response = await fetch(`/image?token=${token}`);
-                if (response.ok) {
-                    const data = await response.text();
-                    document.getElementById('currentImage').src = data;
+            // 点击上传区域触发文件选择
+            uploadContainer.addEventListener('click', () => {
+                if (!uploadBtn.disabled) {
+                    fileInput.click();
                 }
-            } catch (err) {
-                console.error('加载二维码失败:', err);
-            }
-        })();
+            });
 
-        // 拖放功能
-        const dropArea = document.querySelector('.upload-area');
-        const rootStyle = getComputedStyle(document.documentElement);
-        const primaryColor = rootStyle.getPropertyValue('--primary-color').trim();
+            // 拖拽上传功能
+            uploadContainer.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadContainer.classList.add('border-primary', 'bg-blue-50/50');
+            });
 
-        ['dragenter', 'dragover'].forEach(event => {
-          dropArea.addEventListener(event, (e) => {
-            e.preventDefault();
-            dropArea.style.borderColor = primaryColor;
-          });
-        });
+            uploadContainer.addEventListener('dragleave', () => {
+                uploadContainer.classList.remove('border-primary', 'bg-blue-50/50');
+            });
 
-        ['dragleave', 'drop'].forEach(event => {
-          dropArea.addEventListener(event, (e) => {
-            e.preventDefault();
-            dropArea.style.borderColor = '#bdc3c7';
-          });
-        });
+            uploadContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadContainer.classList.remove('border-primary', 'bg-blue-50/50');
 
-        dropArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const files = e.dataTransfer.files;
-            if (files.length) {
-                imageInput.files = files;
-                const file = files[0];
-                updateUI(file);
+                if (e.dataTransfer.files.length) {
+                    handleFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            // 文件选择变化时处理文件
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length) {
+                    handleFile(fileInput.files[0]);
+                }
+            });
+
+            // 上传到服务器按钮
+            submitBtn.addEventListener('click', uploadToServer);
+
+            // 压缩质量滑块事件
+            qualitySlider.addEventListener('input', function() {
+                currentQuality = parseInt(this.value);
+                qualityValue.textContent = `${currentQuality}%`;
                 
-                compressImage(file, qualitySlider.value, (blob) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        previewImage(e.target.result);
-                        const originalSize = (file.size / 1024).toFixed(2);
-                        const compressedSize = (blob.size / 1024).toFixed(2);
-                        fileInfo.innerHTML = `
-                            原始大小: ${originalSize} KB<br>
-                            压缩后: ${compressedSize} KB (节省 ${((1 - blob.size/file.size)*100).toFixed(1)}%)
-                        `;
+                if (originalImageData) {
+                    // 重新压缩图片以更新预计大小
+                    compressImage(originalImageData, null, currentQuality).then(compressed => {
+                        compressedSize.textContent = formatFileSize(getDataUrlSize(compressed.dataUrl));
+                    }).catch(error => {
+                        console.error('图片压缩失败:', error);
+                    });
+                }
+            });
+
+            // 加载服务器上的当前图片
+            function loadServerImage() {
+                fetch(`/image?token=${token}`)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.text();
+                        } else {
+                            throw new Error(`获取服务器图片失败: ${response.status} ${response.statusText}`);
+                        }
+                    })
+                    .then(data => {
+                        // 检查返回的数据是否是有效的dataURL格式
+                        if (data.startsWith('data:image')) {
+                            serverImage.src = data;
+                            serverImage.onload = () => {
+                                serverImageLoading.classList.add('hidden');
+                            };
+                        } else {
+                            throw new Error('服务器返回无效的图片格式');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('加载服务器图片失败:', error);
+                        serverImageLoading.classList.add('hidden');
+                        serverImageError.classList.remove('hidden');
+                    });
+            }
+
+            // 处理选中的文件
+            function handleFile(file) {
+                if (!file.type.startsWith('image/')) {
+                    alert('请选择图片文件');
+                    return;
+                }
+
+                // 读取原始图片数据
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    originalImageData = e.target.result;
+                    
+                    // 显示预览
+                    previewImage.src = originalImageData;
+                    previewContainer.classList.remove('hidden');
+                    uploadContainer.classList.add('hidden');
+                    
+                    // 显示原始大小
+                    originalSize.textContent = formatFileSize(file.size);
+                    
+                    // 使用当前质量设置压缩图片
+                    compressImage(originalImageData, file.type, currentQuality).then(compressed => {
+                        compressedSize.textContent = formatFileSize(getDataUrlSize(compressed.dataUrl));
+                        submitBtn.disabled = false;
+                    }).catch(error => {
+                        console.error('图片压缩失败:', error);
+                        alert('图片压缩失败，请尝试其他图片');
+                        resetToUploadState();
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // 压缩图片 - 增加了quality参数
+            async function compressImage(dataUrl, type, quality = 0.8) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.src = dataUrl;
+                    
+                    img.onload = function() {
+                        // 创建canvas
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // 设置canvas尺寸，保持原始比例
+                        const maxWidth = 800;
+                        const maxHeight = 800;
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > maxWidth) {
+                            height = height * (maxWidth / width);
+                            width = maxWidth;
+                        }
+                        
+                        if (height > maxHeight) {
+                            width = width * (maxHeight / height);
+                            height = maxHeight;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        // 绘制图片到canvas
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // 使用指定的质量压缩图片
+                        const qualityDecimal = quality / 100; // 将百分比转换为小数
+                        const compressedDataUrl = canvas.toDataURL(type || 'image/jpeg', qualityDecimal);
+                        
+                        resolve({
+                            dataUrl: compressedDataUrl,
+                            quality: quality
+                        });
                     };
-                    reader.readAsDataURL(blob);
+                    
+                    img.onerror = reject;
                 });
+            }
+
+            // 上传到服务器
+            function uploadToServer() {
+                if (!originalImageData || !token) return;
+                
+                // 禁用按钮并显示加载状态
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i> 上传中...';
+                
+                // 使用当前质量设置压缩图片
+                compressImage(originalImageData, null, currentQuality).then(compressed => {
+                    const data = compressed.dataUrl;
+                    
+                    // 创建PUT请求
+                    fetch(`/image?token=${token}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'text/plain'
+                        },
+                        body: data
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // 显示成功消息
+                            resultContainer.classList.remove('hidden');
+                            successMessage.classList.remove('hidden');
+                            statusCode.textContent = response.status;
+                            
+                            // 刷新服务器图片预览
+                            loadServerImage();
+                        } else {
+                            // 显示错误消息
+                            resultContainer.classList.remove('hidden');
+                            errorMessage.classList.remove('hidden');
+                            errorText.textContent = `上传失败: ${response.status} ${response.statusText}`;
+                        }
+                    })
+                    .catch(error => {
+                        // 显示错误消息
+                        resultContainer.classList.remove('hidden');
+                        errorMessage.classList.remove('hidden');
+                        errorText.textContent = `网络错误: ${error.message}`;
+                        console.error('上传失败:', error);
+                    })
+                    .finally(() => {
+                        // 重置按钮状态
+                        submitBtn.innerHTML = '<i class="fa fa-paper-plane mr-2"></i> 上传到服务器';
+                    });
+                }).catch(error => {
+                    console.error('图片压缩失败:', error);
+                    alert('图片压缩失败，请尝试重新上传');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa fa-paper-plane mr-2"></i> 上传到服务器';
+                });
+            }
+
+            // 重置到上传状态
+            function resetToUploadState() {
+                // 重置UI
+                previewContainer.classList.add('hidden');
+                uploadContainer.classList.remove('hidden');
+                resultContainer.classList.add('hidden');
+                successMessage.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+                submitBtn.disabled = true;
+                
+                // 重置变量
+                originalImageData = null;
+                fileInput.value = '';
+            }
+
+            // 格式化文件大小
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            // 从DataURL获取文件大小
+            function getDataUrlSize(dataUrl) {
+                const base64String = dataUrl.split(',')[1];
+                const padding = base64String.endsWith('==') ? 2 : base64String.endsWith('=') ? 1 : 0;
+                return (base64String.length * 3 / 4) - padding;
             }
         });
     </script>
 </body>
-</html>
+</html>    
